@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.InputMismatchException;
 import java.util.Properties;
 import java.util.Scanner;
 
@@ -18,6 +19,7 @@ public class ProgressTracker {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
+		Scanner in = new Scanner(System.in);
 		Properties config = new Properties();
 		Connection conn = null;
 		final String URL;
@@ -38,7 +40,6 @@ public class ProgressTracker {
 			conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
 			
 			System.out.println("Connected to the Database....");
-			System.out.println("url: " + URL + " | username: " + USERNAME + " | password " + PASSWORD );
 		} catch (FileNotFoundException e) {			
 			// TODO Auto-generated catch block
 			
@@ -61,18 +62,70 @@ public class ProgressTracker {
 		
 		
 		//pass condition to login
+		System.out.println("Do you have an existing account with JUMP Tv?: ");
+		String ans = in.next().toLowerCase();
 		
-		if(login(conn, prepStatement, user)) {
+		if (ans.equals("yes")) {
 			
+			if(login(conn, prepStatement, result, user, in)) {
+				
+				in.nextLine();
+				boolean running = true;
+				
+				while(running) {
+					System.out.println("*****************");
+					System.out.println("JUMP Tv Watchlist");
+					System.out.println("*****************");
+					System.out.println();
+					
+
+					//Display shows being watched
+					
+					String menuInput = "0";
+					
+					System.out.println("1) Update show progress");
+					System.out.println("2) Add a new show to watchlist");
+					System.out.println("3) Remove a show from watchlist");
+					System.out.println("4) Exit Program");
+					System.out.println();
+					System.out.println("Enter the number of your selection: ");
+					menuInput = in.nextLine();
+					switch(menuInput) {
+						case("1"):
+							updateProgress(in);
+							break;
+						case("2"):
+							addShow(in);
+							break;
+						case("3"):
+							dropShow(in);
+							break;
+						case("4"):
+							running = false;
+							break;
+						default:
+							System.out.println();
+							System.out.println("Invalid input! Please enter an option from the menu!");
+							System.out.println();
+					}//switch
+
+					System.out.println();
+					
+				}//while
+				
+				System.out.println("Thank you for using Jump Tv Watchlist!");
+				in.close();
+			}//main
 			
 		} else {
 			
-			createUser(conn, statement, prepStatement, result, user);
+			createUser(conn, statement, prepStatement, result, user, in);
 		}
 	}
 	
-	public static boolean createUser(Connection conn, Statement statement, PreparedStatement prepStatement, ResultSet result, User user) {
-		Scanner in = new Scanner(System.in);
+	
+	public static boolean createUser(Connection conn, Statement statement, PreparedStatement prepStatement, ResultSet result, User user, Scanner in) {
+		
 		boolean login = false;
 		
 		String username = "";
@@ -87,9 +140,7 @@ public class ProgressTracker {
 		
 		user = new User(username, password);
 		
-		String query = "create user '" + user.getUsername() + "'@'localhost' identified with mysql_native_password by '" + user.getPassword() + "'";
-		String setPrivileges = "grant all privileges on progresstracker.* to '" + user.getUsername() + "'@'localhost';";
-		System.out.println(setPrivileges);
+		String query = "insert into users values('" + user.getUsername() + "', '"+ user.getPassword() + "');";
 		System.out.println(query);
 		
 		try {
@@ -97,11 +148,6 @@ public class ProgressTracker {
 			statement = conn.createStatement();
 			int row = statement.executeUpdate(query);
 			System.out.println(row + " row/s was affected");
-			
-			statement = conn.createStatement();
-			int priv = statement.executeUpdate(setPrivileges);
-			System.out.println(priv + " -----> You can now access shows from the list");
-			login = true;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			
@@ -112,18 +158,167 @@ public class ProgressTracker {
 		return login;
 	}
 	
-	public static void displayUserData(Connection conn, PreparedStatement prepStatement, ResultSet result, User user) {
+	public static boolean login(Connection conn, PreparedStatement prepStatement, ResultSet result, User user, Scanner in) {
 		
-		String getUserData = "";
+		System.out.println("================ Login ===============");
+		System.out.println("username: ");
+		String logUser = in.next();
+		System.out.println("password: ");
+		String logPass = in.next();
 		
 		try {
 			
-			prepStatement = conn.prepareStatement("prepStatement");
+			
+			prepStatement = conn.prepareStatement("select * from users where userName=? and userPassword=?");
+			prepStatement.setString(1, logUser);
+			prepStatement.setString(2, logPass);
+			
+			result = prepStatement.executeQuery();
+			
+			return true;
+			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			
+			System.out.println("Wrong Username/Password ============== (T.T)");
 			e.printStackTrace();
+			return false;
 		}
 	}
+		
+	public static void updateProgress(Scanner readIn) {
+		int id;
+		String yesNo = "";
+		boolean exit = false;
+		//Display tracked shows
+		System.out.println("Enter the id for the show you wish to update: ");
+		while(true) {
+			try{
+				id = readIn.nextInt();
+				readIn.nextLine();
+				//Check tracked shows for valid id
+				break;
+			}
+			catch(InputMismatchException e) {
+				System.out.println();
+				System.out.println("Must be a number!");
+				readIn.nextLine();
+			}
+		}//while
+		
+		//Update the episodes watched in DB
+		
+		
+		while(exit == false) {
+			System.out.println("Would you like to update another show? (Y/N)");
+			yesNo = readIn.nextLine();
+			yesNo = yesNo.toUpperCase();
+			if (yesNo.charAt(0) == 'Y') {
+				updateProgress(readIn);
+				break;
+			}
+			else if (yesNo.charAt(0) == 'N') exit = true;
+			
+			else {
+				System.out.println();
+				System.err.println("Invalid input! Please enter Y for yes or N for no!");
+				System.out.println();
+			}
+
+		}//while
+		
+	}//updateProgress
+		
+		
+		
+	public static void addShow(Scanner readIn) {
+		int id;
+		String yesNo = "";
+		boolean exit = false;
+		//Display shows that arent being tracked
+		System.out.println("Enter the id for the show you wish to add to your watch list: ");
+		while(true) {
+			try{
+				id = readIn.nextInt();
+				
+				//Check shows for valid id
+				break;
+			}
+			catch(InputMismatchException e) {
+				System.out.println();
+				System.out.println("Must be a number!");
+				readIn.nextLine();
+			}
+		}//while
+		
+		readIn.nextLine();
+		
+		//add the new show to users watchlist
+		
+		System.out.println();
+		while(exit == false) {
+			System.out.println("Would you like to add another show? (Y/N)");
+			yesNo = readIn.nextLine();
+			yesNo = yesNo.toUpperCase();
+			if (yesNo.charAt(0) == 'Y') {
+				addShow(readIn);
+				break;
+			}
+			else if (yesNo.charAt(0) == 'N') exit = true;
+			
+			else {
+				System.out.println();
+				System.err.println("Invalid input! Please enter Y for yes or N for no!");
+				System.out.println();
+			}
+			
+		}//while
+		
+	}//addShow
+	
+	public static void dropShow(Scanner readIn) {
+		int id;
+		String yesNo = "";
+		boolean exit = false;
+		//Display shows that are being tracked
+		System.out.println("Enter the id for the show you wish to remove from your watch list: ");
+		while(true) {
+			try{
+				id = readIn.nextInt();
+				
+				//Check shows for valid id
+				break;
+			}
+			catch(InputMismatchException e) {
+				System.out.println();
+				System.out.println("Must be a number!");
+				readIn.nextLine();
+			}
+		}//while
+		
+		readIn.nextLine();
+		
+		//add the new show to users watchlist
+		
+		System.out.println();
+		while(exit == false) {
+			System.out.println("Would you like to remove another show? (Y/N)");
+			yesNo = readIn.nextLine();
+			yesNo = yesNo.toUpperCase();
+			if (yesNo.charAt(0) == 'Y') {
+				dropShow(readIn);
+				break;
+			}
+			else if (yesNo.charAt(0) == 'N') exit = true;
+			
+			else {
+				System.out.println();
+				System.err.println("Invalid input! Please enter Y for yes or N for no!");
+				System.out.println();
+			}
+			
+		}//while
+		
+	}//addShow
 
 }

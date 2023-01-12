@@ -1,3 +1,5 @@
+package Cognixia.jdbc.progresstracker;
+
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
