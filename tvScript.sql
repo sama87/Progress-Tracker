@@ -49,6 +49,7 @@ CREATE TABLE TRACKER (
 
 CREATE TABLE USER (
 	username VARCHAR(50) NOT NULL,
+    password VARCHAR(50) NOT NULL,
     FOREIGN KEY (username) REFERENCES HAS_SHOW(username),
     FOREIGN KEY (username) REFERENCES TRACKER(username)
 );
