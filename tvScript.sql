@@ -22,20 +22,14 @@ CREATE TABLE HAS_SHOW(
 
 
 CREATE TABLE EPISODE (
+	tv_id INT NOT NULL,
 	episode_id INT NOT NULL,
     name VARCHAR(50),
     description VARCHAR(255), 
-    PRIMARY KEY (episode_id)
-);
-
-
-CREATE TABLE SEASON (
-	tv_id INT NOT NULL,
-    episode_id INT NOT NULL,
     PRIMARY KEY (tv_id, episode_id),
-    FOREIGN KEY (tv_id) REFERENCES TV_SHOW(tv_id),
-    FOREIGN KEY (episode_id) REFERENCES EPISODE(episode_id)
+    FOREIGN KEY (tv_id) REFERENCES TV_SHOW(tv_id)
 );
+
 
 
 CREATE TABLE TRACKER (
