@@ -34,8 +34,6 @@ CREATE TABLE EPISODE (
 CREATE TABLE SEASON (
 	tv_id INT NOT NULL,
     episode_id INT NOT NULL,
-    season_start DATE,
-    season_end DATE,
     PRIMARY KEY (tv_id, episode_id),
     FOREIGN KEY (tv_id) REFERENCES TV_SHOW(tv_id),
     FOREIGN KEY (episode_id) REFERENCES EPISODE(episode_id)
