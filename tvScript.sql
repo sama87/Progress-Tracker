@@ -53,3 +53,5 @@ CREATE TABLE USER (
     FOREIGN KEY (username) REFERENCES HAS_SHOW(username),
     FOREIGN KEY (username) REFERENCES TRACKER(username)
 );
+
+select * from tv_show;
