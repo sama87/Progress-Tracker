@@ -37,7 +37,6 @@ CREATE TABLE SEASON (
     FOREIGN KEY (episode_id) REFERENCES EPISODE(episode_id)
 );
 
-select * from episode;
 
 CREATE TABLE TRACKER (
 	username VARCHAR(50) NOT NULL,
