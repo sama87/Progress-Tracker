@@ -100,7 +100,7 @@ public class ProgressTracker {
 								updateProgress(in);
 								break;
 							case("2"):
-								addShow(conn, prepStatement, result, user, in);
+								addShow(conn, statement, prepStatement, result, user, in);
 								break;
 							case("3"):
 								dropShow(in);
@@ -145,7 +145,7 @@ public class ProgressTracker {
 		
 		user = new User(username, password);
 		
-		String query = "insert into users values('" + user.getUsername() + "', '"+ user.getPassword() + "');";
+		String query = "insert into user(username, password) values('" + user.getUsername() + "', '"+ user.getPassword() + "');";
 		System.out.println(query);
 		
 		try {
@@ -157,7 +157,7 @@ public class ProgressTracker {
 			// TODO Auto-generated catch block
 			
 			System.out.println("An error has occured while creating your profile or user exists... ");
-//			e.printStackTrace();
+			e.printStackTrace();
 		}		
 		
 		return user;
@@ -175,11 +175,13 @@ public class ProgressTracker {
 		
 		try {			
 			
-			prepStatement = conn.prepareStatement("select userName, userPassword from users where userName= ? and userPassword= ?");
+			prepStatement = conn.prepareStatement("select username, password from user where username= ? and password= ?");
 			prepStatement.setString(1, user.getUsername());
 			prepStatement.setString(2, user.getPassword());
+			
 			String testLogUser = "";
 			String testLogPass = "";
+			
 			result = prepStatement.executeQuery();
 			
 			if (result.next()) {
@@ -261,8 +263,8 @@ public class ProgressTracker {
 		
 		
 		
-	public static void addShow(Connection conn, PreparedStatement prepStatement, ResultSet result, User user,  Scanner readIn) {
-		String id = user.getUsername();
+	public static void addShow(Connection conn, Statement statement, PreparedStatement prepStatement, ResultSet result, User user,  Scanner readIn) {
+		int id = 0;
 		String yesNo = "";
 		boolean exit = false;
 		
@@ -270,11 +272,24 @@ public class ProgressTracker {
 		System.out.println("Enter the id for the show you wish to add to your watch list: ");
 		while(true) {
 			try{
-				id = readIn.nextLine().toLowerCase();
+//				id = readIn.nextInt();
 				
-				String getId = "select * from shows where id = ?";
-				prepStatement = conn.prepareStatement(getId);
-				prepStatement.setString(1, id);
+				
+				String getShows = "select * from tv_show";
+				result  = statement.executeQuery(getShows);
+				
+				while(result.next()) {
+					
+					System.out.println("Title: " result.getInt(1));
+				}
+				
+				
+				
+				
+				String getId = "select tv_id as 'ShowID' , name as 'Title', desc as 'Summary/Plot' from tv_show where tv_id = ?";			
+				
+				prepStatement = conn.prepareStatement(getShows);
+//				prepStatement.setInt(1, id);
 				
 				result = prepStatement.executeQuery();
 				
