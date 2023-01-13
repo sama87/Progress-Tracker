@@ -67,7 +67,7 @@ public class ProgressTracker {
 		
 		if (ans.equals("yes")) {
 			
-			if(login(conn, prepStatement, result, user, in)) {
+			if(login(conn, statement, prepStatement, result, user, in) != null) {
 				
 				in.nextLine();
 				boolean running = true;
@@ -95,7 +95,7 @@ public class ProgressTracker {
 							updateProgress(in);
 							break;
 						case("2"):
-							addShow(in);
+							addShow(conn, prepStatement, result, user, in);
 							break;
 						case("3"):
 							dropShow(in);
@@ -126,8 +126,7 @@ public class ProgressTracker {
 	
 	public static boolean createUser(Connection conn, Statement statement, PreparedStatement prepStatement, ResultSet result, User user, Scanner in) {
 		
-		boolean login = false;
-		
+		boolean login = true;
 		String username = "";
 		String password = "";
 		
@@ -154,36 +153,61 @@ public class ProgressTracker {
 			login = false;
 			e.printStackTrace();
 		}		
-			
+		
 		return login;
 	}
 	
-	public static boolean login(Connection conn, PreparedStatement prepStatement, ResultSet result, User user, Scanner in) {
+	public static User login(Connection conn, Statement statement, PreparedStatement prepStatement, ResultSet result, User user, Scanner in) {
 		
 		System.out.println("================ Login ===============");
 		System.out.println("username: ");
 		String logUser = in.next();
 		System.out.println("password: ");
 		String logPass = in.next();
+		user = new User(logUser, logPass);
+		System.out.println("user: " + user.getUsername() + "  password: " + user.getPassword());
 		
-		try {
+		try {			
 			
-			
-			prepStatement = conn.prepareStatement("select * from users where userName=? and userPassword=?");
-			prepStatement.setString(1, logUser);
-			prepStatement.setString(2, logPass);
-			
+			prepStatement = conn.prepareStatement("select userName, userPassword from users where userName= ? and userPassword= ?");
+			prepStatement.setString(1, user.getUsername());
+			prepStatement.setString(2, user.getPassword());
+			String testLogUser = "";
+			String testLogPass = "";
 			result = prepStatement.executeQuery();
 			
-			return true;
+			if (result.next()) {
+				
+				testLogUser = result.getString(1);
+				testLogPass = result.getString(2);	
+			}			
+			
+			System.out.println("login: " + testLogUser);
+			System.out.println("password: " + testLogPass);
+			
+			return user;
 			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
-			
-			System.out.println("Wrong Username/Password ============== (T.T)");
+			System.out.println();
 			e.printStackTrace();
-			return false;
+			System.out.println("Wrong Username/Password ============== (T.T)");
+			System.out.println("Do you want to create a username and password? 'y' or 'n': ");
+			char reply = in.next().charAt(0);
+			
+			if (reply != 'y') {
+				
+				System.out.println("Cannot login to server without username and password.... exiting application");
+				user=null;
+				return user;
+			} else {
+				
+				createUser(conn, statement, prepStatement, result, user, in);
+			}
+			e.printStackTrace();
+			return null;
 		}
+		
 	}
 		
 	public static void updateProgress(Scanner readIn) {
@@ -231,22 +255,33 @@ public class ProgressTracker {
 		
 		
 		
-	public static void addShow(Scanner readIn) {
-		int id;
+	public static void addShow(Connection conn, PreparedStatement prepStatement, ResultSet result, User user,  Scanner readIn) {
+		String id = user.getUsername();
 		String yesNo = "";
 		boolean exit = false;
-		//Display shows that arent being tracked
+		
+		//Display shows that aren't being tracked
 		System.out.println("Enter the id for the show you wish to add to your watch list: ");
 		while(true) {
 			try{
-				id = readIn.nextInt();
+				id = readIn.nextLine().toLowerCase();
+				
+				String getId = "select * from shows where id = ?";
+				prepStatement = conn.prepareStatement(getId);
+				prepStatement.setString(1, id);
+				
+				result = prepStatement.executeQuery();
 				
 				//Check shows for valid id
+				if(result.next()) {
+					
+					System.out.println("Title: " + result.getInt(1)); //puts out the value of the show
+				}
 				break;
 			}
-			catch(InputMismatchException e) {
+			catch(InputMismatchException | SQLException e) {
 				System.out.println();
-				System.out.println("Must be a number!");
+				System.out.println("Invalid ID");
 				readIn.nextLine();
 			}
 		}//while
@@ -261,7 +296,7 @@ public class ProgressTracker {
 			yesNo = readIn.nextLine();
 			yesNo = yesNo.toUpperCase();
 			if (yesNo.charAt(0) == 'Y') {
-				addShow(readIn);
+				addShow(conn, prepStatement, result, user, readIn);
 				break;
 			}
 			else if (yesNo.charAt(0) == 'N') exit = true;
