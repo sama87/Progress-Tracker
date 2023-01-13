@@ -43,7 +43,8 @@ CREATE TABLE TRACKER (
     completed boolean,
     in_progress boolean,
     not_started boolean,
-    PRIMARY KEY (username, episode_id)
+    PRIMARY KEY (username, episode_id),
+    FOREIGN KEY (episode_id) REFERENCES EPISODE(episode_id)
 );
 
 CREATE TABLE USER (
@@ -52,9 +53,3 @@ CREATE TABLE USER (
     FOREIGN KEY (username) REFERENCES HAS_SHOW(username),
     FOREIGN KEY (username) REFERENCES TRACKER(username)
 );
-
-ow import failed with error: ('Cannot add or update a child row: a foreign key constraint fails (`tv_show_tracker`.`episode`, CONSTRAINT `episode_ibfk_1` FOREIGN KEY (`tv_id`) REFERENCES `tv_show` (`tv_id`))', 1452)
-- Row import failed with error: ('Cannot add or update a child row: a foreign key constraint fails (`tv_show_tracker`.`episode`, CONSTRAINT `episode_ibfk_1` FOREIGN KEY (`tv_id`) REFERENCES `tv_show` (`tv_id`))', 1452)
-
-
-select * from tv_show;
