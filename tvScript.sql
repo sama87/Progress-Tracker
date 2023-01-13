@@ -17,6 +17,7 @@ CREATE TABLE HAS_SHOW(
     tv_id INT NOT NULL,
     percentage_completed INT,
     PRIMARY KEY (username, tv_id),
+    FOREIGN KEY (username) REFERENCES USER (username),
     FOREIGN KEY (tv_id) REFERENCES TV_SHOW(tv_id)
 );
 
@@ -44,14 +45,12 @@ CREATE TABLE TRACKER (
     in_progress boolean,
     not_started boolean,
     PRIMARY KEY (username, episode_id),
+    FOREIGN KEY (username) REFERENCES USER (username),
     FOREIGN KEY (episode_id) REFERENCES EPISODE(episode_id)
 );
 
 CREATE TABLE USER (
 	username VARCHAR(50) NOT NULL,
     password VARCHAR(50) NOT NULL,
-    FOREIGN KEY (username) REFERENCES HAS_SHOW(username),
-    FOREIGN KEY (username) REFERENCES TRACKER(username)
+    PRIMARY KEY (username, password)
 );
-
-select * from tv_show;
