@@ -8,7 +8,7 @@ USE TV_Show_Tracker;
 CREATE TABLE TV_SHOW (
 	tv_id INT NOT NULL,
     name VARCHAR(255),
-    description VARCHAR(255),
+    description TEXT,
     PRIMARY KEY (tv_id)
 );
 
@@ -25,11 +25,16 @@ CREATE TABLE EPISODE (
 	tv_id INT NOT NULL,
 	episode_id INT NOT NULL,
     name VARCHAR(50),
-    description VARCHAR(255), 
-    PRIMARY KEY (tv_id, episode_id),
-    FOREIGN KEY (tv_id) REFERENCES TV_SHOW(tv_id)
+    description TEXT, 
+    PRIMARY KEY (episode_id)
 );
 
+CREATE TABLE SEASON (
+	tv_id INT NOT NULL,
+    episode_id INT NOT NULL,
+    FOREIGN KEY (tv_id) REFERENCES TV_SHOW(tv_id),
+    FOREIGN KEY (episode_id) REFERENCES EPISODE(episode_id)
+);
 
 
 CREATE TABLE TRACKER (
@@ -38,7 +43,8 @@ CREATE TABLE TRACKER (
     completed boolean,
     in_progress boolean,
     not_started boolean,
-    PRIMARY KEY (username, episode_id)
+    PRIMARY KEY (username, episode_id),
+    FOREIGN KEY (episode_id) REFERENCES EPISODE(episode_id)
 );
 
 CREATE TABLE USER (
@@ -48,3 +54,4 @@ CREATE TABLE USER (
     FOREIGN KEY (username) REFERENCES TRACKER(username)
 );
 
+select * from tv_show;
