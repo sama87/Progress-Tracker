@@ -72,7 +72,9 @@ public class ProgressTracker {
 			
 			if (!ans.equals("no")) {
 				
-				if(login(conn, statement, prepStatement, result, user, in) != null) { //if user is not null 
+				user = login(conn, statement, prepStatement, result, user, in);
+				
+				if(user != null) { //if user is not null 
 					
 					in.nextLine();
 					boolean running = true;
@@ -269,27 +271,24 @@ public class ProgressTracker {
 		boolean exit = false;
 		
 		//Display shows that aren't being tracked
-		System.out.println("Enter the id for the show you wish to add to your watch list: ");
+		
 		while(true) {
-			try{
-//				id = readIn.nextInt();
+			try{				
 				
-				
-				String getShows = "select * from tv_show";
-				result  = statement.executeQuery(getShows);
+				statement = conn.createStatement();
+				result  = statement.executeQuery("select * from tv_show ");
 				
 				while(result.next()) {
 					
-					System.out.println("Title: " result.getInt(1));
+					System.out.println("Show ID: " + result.getInt(1) + "  Title: " + result.getString(2) + "  Description/Summary: \n" + result.getString(3));
 				}
+								
+				System.out.println("Enter the id for the show you wish to add to your watch list: ");
+				id = readIn.nextInt();
 				
-				
-				
-				
-				String getId = "select tv_id as 'ShowID' , name as 'Title', desc as 'Summary/Plot' from tv_show where tv_id = ?";			
-				
-				prepStatement = conn.prepareStatement(getShows);
-//				prepStatement.setInt(1, id);
+				String getId = "select tv_id from tv_show where tv_id = ?";					
+				prepStatement = conn.prepareStatement(getId);
+				prepStatement.setInt(1, id);
 				
 				result = prepStatement.executeQuery();
 				
@@ -298,12 +297,18 @@ public class ProgressTracker {
 					
 					System.out.println("Title: " + result.getInt(1)); //puts out the value of the show
 				}
+				
+				prepStatement = conn.prepareStatement("insert into has_show(username, tv_id) values (?,?)");
+				prepStatement.setString(1, user.getUsername());
+				prepStatement.setInt(2, id);
+				
+				result = prepStatement.executeQuery();
 				break;
 			}
 			catch(InputMismatchException | SQLException e) {
 				System.out.println();
 				System.out.println("Invalid ID");
-				readIn.nextLine();
+//				readIn.nextLine();
 			}
 		}//while
 		
@@ -317,7 +322,7 @@ public class ProgressTracker {
 			yesNo = readIn.nextLine();
 			yesNo = yesNo.toUpperCase();
 			if (yesNo.charAt(0) == 'Y') {
-				addShow(conn, prepStatement, result, user, readIn);
+				addShow(conn, statement, prepStatement, result, user, readIn);
 				break;
 			}
 			else if (yesNo.charAt(0) == 'N') exit = true;
