@@ -12,6 +12,20 @@ CREATE TABLE TV_SHOW (
     PRIMARY KEY (tv_id)
 );
 
+CREATE TABLE USER (
+	username VARCHAR(50) NOT NULL,
+    password VARCHAR(50) NOT NULL,
+    PRIMARY KEY (username, password)
+);
+
+CREATE TABLE EPISODE (
+	tv_id INT NOT NULL,
+	episode_id INT NOT NULL,
+    name VARCHAR(50),
+    description TEXT, 
+    PRIMARY KEY (episode_id)
+);
+
 CREATE TABLE HAS_SHOW(
 	username VARCHAR(50) NOT NULL,
     tv_id INT NOT NULL,
@@ -21,14 +35,6 @@ CREATE TABLE HAS_SHOW(
     FOREIGN KEY (tv_id) REFERENCES TV_SHOW(tv_id)
 );
 
-
-CREATE TABLE EPISODE (
-	tv_id INT NOT NULL,
-	episode_id INT NOT NULL,
-    name VARCHAR(50),
-    description TEXT, 
-    PRIMARY KEY (episode_id)
-);
 
 CREATE TABLE SEASON (
 	tv_id INT NOT NULL,
@@ -49,8 +55,4 @@ CREATE TABLE TRACKER (
     FOREIGN KEY (episode_id) REFERENCES EPISODE(episode_id)
 );
 
-CREATE TABLE USER (
-	username VARCHAR(50) NOT NULL,
-    password VARCHAR(50) NOT NULL,
-    PRIMARY KEY (username, password)
-);
+
