@@ -62,71 +62,79 @@ public class ProgressTracker {
 		
 		
 		//pass condition to login
-		System.out.println("Do you have an existing account with JUMP Tv?: ");
-		String ans = in.next().toLowerCase();
 		
-		if (ans.equals("yes")) {
+		char run = 'y';
+		
+		while (run != 'n') {
 			
-			if(login(conn, statement, prepStatement, result, user, in) != null) {
+			System.out.println("Do you have an existing account with JUMP Tv?: ");
+			String ans = in.next().toLowerCase();
+			
+			if (!ans.equals("no")) {
 				
-				in.nextLine();
-				boolean running = true;
-				
-				while(running) {
-					System.out.println("*****************");
-					System.out.println("JUMP Tv Watchlist");
-					System.out.println("*****************");
-					System.out.println();
+				if(login(conn, statement, prepStatement, result, user, in) != null) { //if user is not null 
 					
+					in.nextLine();
+					boolean running = true;
+					
+					while(running) {
+						System.out.println("*****************");
+						System.out.println("JUMP Tv Watchlist");
+						System.out.println("*****************");
+						System.out.println();
+						
 
-					//Display shows being watched
+						//Display shows being watched
+						
+						String menuInput = "0";
+						
+						System.out.println("1) Update show progress");
+						System.out.println("2) Add a new show to watchlist");
+						System.out.println("3) Remove a show from watchlist");
+						System.out.println("4) Exit Program");
+						System.out.println();
+						System.out.println("Enter the number of your selection: ");
+						menuInput = in.nextLine();
+						switch(menuInput) {
+							case("1"):
+								updateProgress(in);
+								break;
+							case("2"):
+								addShow(conn, prepStatement, result, user, in);
+								break;
+							case("3"):
+								dropShow(in);
+								break;
+							case("4"):
+								running = false;
+								break;
+							default:
+								System.out.println();
+								System.out.println("Invalid input! Please enter an option from the menu!");
+								System.out.println();
+						}//switch					
+					}// Running the menu
 					
-					String menuInput = "0";
-					
-					System.out.println("1) Update show progress");
-					System.out.println("2) Add a new show to watchlist");
-					System.out.println("3) Remove a show from watchlist");
-					System.out.println("4) Exit Program");
-					System.out.println();
-					System.out.println("Enter the number of your selection: ");
-					menuInput = in.nextLine();
-					switch(menuInput) {
-						case("1"):
-							updateProgress(in);
-							break;
-						case("2"):
-							addShow(conn, prepStatement, result, user, in);
-							break;
-						case("3"):
-							dropShow(in);
-							break;
-						case("4"):
-							running = false;
-							break;
-						default:
-							System.out.println();
-							System.out.println("Invalid input! Please enter an option from the menu!");
-							System.out.println();
-					}//switch
-
-					System.out.println();
-					
-				}//while
+					System.out.println("Thank you for using Jump Tv Watchlist!");					
+				}					
 				
-				System.out.println("Thank you for using Jump Tv Watchlist!");
-				in.close();
-			}//main
+//				System.out.println("Connect to app?: ");
+//				ans = in.nextLine();			
+			} else {
+				
+				createUser(conn, statement, prepStatement, result, user, in);// if login returns null				
+			} // while ans is yes or no
 			
-		} else {
-			
-			createUser(conn, statement, prepStatement, result, user, in);
-		}
-	}
+			System.out.println("Connect to JUMP TV? (y or n): ");
+			run = in.next().charAt(0);
+		}//Run app loop (y or n);
+		
+		in.close();
+	}//main
 	
 	
-	public static boolean createUser(Connection conn, Statement statement, PreparedStatement prepStatement, ResultSet result, User user, Scanner in) {
+	public static User createUser(Connection conn, Statement statement, PreparedStatement prepStatement, ResultSet result, User user, Scanner in) {
 		
-		boolean login = true;
 		String username = "";
 		String password = "";
 		
@@ -134,8 +142,6 @@ public class ProgressTracker {
 		username = in.next();
 		System.out.println("Enter a Password: ");
 		password = in.next();
-		
-		in.close();
 		
 		user = new User(username, password);
 		
@@ -150,11 +156,11 @@ public class ProgressTracker {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			
-			login = false;
-			e.printStackTrace();
+			System.out.println("An error has occured while creating your profile or user exists... ");
+//			e.printStackTrace();
 		}		
 		
-		return login;
+		return user;
 	}
 	
 	public static User login(Connection conn, Statement statement, PreparedStatement prepStatement, ResultSet result, User user, Scanner in) {
@@ -165,7 +171,7 @@ public class ProgressTracker {
 		System.out.println("password: ");
 		String logPass = in.next();
 		user = new User(logUser, logPass);
-		System.out.println("user: " + user.getUsername() + "  password: " + user.getPassword());
+//		System.out.println("user: " + user.getUsername() + "  password: " + user.getPassword());
 		
 		try {			
 			
@@ -182,8 +188,8 @@ public class ProgressTracker {
 				testLogPass = result.getString(2);	
 			}			
 			
-			System.out.println("login: " + testLogUser);
-			System.out.println("password: " + testLogPass);
+//			System.out.println("login: " + testLogUser);
+//			System.out.println("password: " + testLogPass);
 			
 			return user;
 			
