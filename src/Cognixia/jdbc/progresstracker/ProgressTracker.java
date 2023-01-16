@@ -1,4 +1,4 @@
-package Cognixia.jdbc.progresstracker;
+package why;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -28,7 +28,6 @@ public class ProgressTracker {
 		User user = null;
 		
 		//Test Connection to cognixia database project
-		
 		try{
 			
 			config.load(new FileInputStream("resources/ProgressTracker.properties"));
@@ -99,13 +98,13 @@ public class ProgressTracker {
 						menuInput = in.nextLine();
 						switch(menuInput) {
 							case("1"):
-								updateProgress(in);
+								updateProgress(conn, statement, prepStatement, result, user, in);
 								break;
 							case("2"):
 								addShow(conn, statement, prepStatement, result, user, in);
 								break;
 							case("3"):
-								dropShow(in);
+								dropShow(conn, statement, prepStatement, result, user, in);
 								break;
 							case("4"):
 								running = false;
@@ -220,24 +219,85 @@ public class ProgressTracker {
 		
 	}
 		
-	public static void updateProgress(Scanner readIn) {
+	public static void updateProgress(Connection conn, Statement statement, PreparedStatement prepStatement, ResultSet result, User user,Scanner readIn) {
 		int id;
+		int epsSeen;
+		int epsExisting;
+		int percent = 0;
 		String yesNo = "";
 		boolean exit = false;
-		//Display tracked shows
-		System.out.println("Enter the id for the show you wish to update: ");
+		ResultSet rs2 = null;
+
 		while(true) {
 			try{
+				//Display tracked shows
+
+				statement = conn.createStatement();
+				result = statement.executeQuery("select tv_show.tv_id, name, description, percentage_completed from has_show "
+						+ "inner join tv_show on tv_show.tv_id = has_show.tv_id; ");
+				System.out.println("\nShows currently on watch list:\n");
+				
+				while(result.next()) {
+					System.out.println("Show ID: " + result.getInt(1) + "   Title: " + result.getString(2)+ "   Completed: " + result.getInt(4) + "%   Description: \n" + result.getString(3)
+					);
+				}
+				
+				
+				System.out.println("\nEnter the id for the show you wish to update: ");
 				id = readIn.nextInt();
 				readIn.nextLine();
-				//Check tracked shows for valid id
+				//Check tracked shows for valid id, update if valid
+				
+				result = statement.executeQuery("select tv_show.tv_id, name from has_show "
+						+ "inner join tv_show on tv_show.tv_id = has_show.tv_id; ");
+				while(result.next()) {
+					if (id == result.getInt(1)  ) {
+						System.out.println("How many episodes of " + result.getString(2) + " have you seen?");
+						epsSeen = readIn.nextInt();
+						readIn.nextLine();
+						
+						rs2 = statement.executeQuery("select COUNT(episode_id) from episode "
+								+ "inner join tv_show on tv_show.tv_id = episode.tv_id "
+								+ "where tv_show.tv_id = " + id + ";");
+						rs2.next();
+						epsExisting = rs2.getInt(1);
+						
+						if (epsSeen > epsExisting) {
+							System.out.println("There aren't that many episodes!");
+							id = 0;
+							break;
+						}
+						else {
+							percent = (epsSeen * 100) / epsExisting;
+							System.out.println(percent);
+							statement.executeUpdate("update has_show set percentage_completed = " + percent + " where username = \"" +
+							user.getUsername() + "\" AND tv_id = " + id + ";");
+
+						}
+						
+						System.out.println("Your progress has been updated: ");
+						rs2 = statement.executeQuery("select tv_show.tv_id, name, description, percentage_completed from tv_show " +
+						"inner join has_show on tv_show.tv_id = has_show.tv_id where has_show.tv_id = " + id + ";");
+						rs2.next();
+						System.out.println("Show ID: " + rs2.getInt(1) + "   Title: " + rs2.getString(2) + 
+								"   Completed: " + rs2.getInt(4) + "%   Description: \n" + rs2.getString(3));
+						
+						id = 0;
+						break;
+					}			
+				}
+				if(id != 0) System.out.println("Show ID " +  id + " is invalid. No changes where made");
 				break;
 			}
 			catch(InputMismatchException e) {
 				System.out.println();
 				System.out.println("Must be a number!");
 				readIn.nextLine();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
+			
 		}//while
 		
 		//Update the episodes watched in DB
@@ -248,7 +308,7 @@ public class ProgressTracker {
 			yesNo = readIn.nextLine();
 			yesNo = yesNo.toUpperCase();
 			if (yesNo.charAt(0) == 'Y') {
-				updateProgress(readIn);
+				updateProgress(conn, statement, prepStatement, result, user,readIn);
 				break;
 			}
 			else if (yesNo.charAt(0) == 'N') exit = true;
@@ -337,17 +397,42 @@ public class ProgressTracker {
 		
 	}//addShow
 	
-	public static void dropShow(Scanner readIn) {
+	public static void dropShow(Connection conn, Statement statement, PreparedStatement prepStatement, ResultSet result, User user,Scanner readIn) {
 		int id;
 		String yesNo = "";
 		boolean exit = false;
-		//Display shows that are being tracked
-		System.out.println("Enter the id for the show you wish to remove from your watch list: ");
+	
 		while(true) {
 			try{
+				//Display shows that are being tracked
+				statement = conn.createStatement();
+				result = statement.executeQuery("select tv_show.tv_id, name, description, percentage_completed from has_show "
+						+ "inner join tv_show on tv_show.tv_id = has_show.tv_id; ");
+				System.out.println("\nShows currently on watch list:\n");
+				
+				
+				while(result.next()) {
+					System.out.println("Show ID: " + result.getInt(1) + "   Title: " + result.getString(2)+ "   Completed: " + result.getInt(4) + "%   Description: \n" + result.getString(3)
+					);
+				}
+				
+				System.out.println("\nEnter the id for the show you wish to remove from your watch list: ");
 				id = readIn.nextInt();
 				
-				//Check shows for valid id
+				//Remove selection from watch list 
+				statement = conn.createStatement();
+				result = statement.executeQuery("select tv_show.tv_id, name from has_show "
+						+ "inner join tv_show on tv_show.tv_id = has_show.tv_id; ");
+				while(result.next()) {
+					if (id == result.getInt(1)  ) {
+						System.out.println(result.getString(2) + " has been removed from your watch list");
+						statement.executeUpdate("DELETE FROM has_show WHERE tv_id = " + id);
+						id = 0;
+						break;
+					}			
+				}
+				if(id != 0) System.out.println("Show ID " +  id + " is invalid. No changes where made");
+
 				break;
 			}
 			catch(InputMismatchException e) {
@@ -355,11 +440,14 @@ public class ProgressTracker {
 				System.out.println("Must be a number!");
 				readIn.nextLine();
 			}
+			catch(SQLException e) {
+				e.printStackTrace();
+			}
 		}//while
 		
 		readIn.nextLine();
 		
-		//add the new show to users watchlist
+	
 		
 		System.out.println();
 		while(exit == false) {
@@ -367,7 +455,7 @@ public class ProgressTracker {
 			yesNo = readIn.nextLine();
 			yesNo = yesNo.toUpperCase();
 			if (yesNo.charAt(0) == 'Y') {
-				dropShow(readIn);
+				dropShow(conn, statement, prepStatement, result, user, readIn);
 				break;
 			}
 			else if (yesNo.charAt(0) == 'N') exit = true;
