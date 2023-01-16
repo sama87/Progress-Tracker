@@ -368,7 +368,9 @@ public class ProgressTracker {
 			try{				
 				
 				statement = conn.createStatement();
-				result  = statement.executeQuery("select * from tv_show ");
+				result  = statement.executeQuery("Select tv_show.tv_id, name, description FROM tv_show"
+						+ " left outer join has_show on has_show.tv_id = tv_show.tv_id"
+						+ " where has_show.tv_id is null;");
 				
 				while(result.next()) {
 					
