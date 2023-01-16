@@ -51,9 +51,9 @@ Users have more flexibility using Jump Tv with the follwing additions to the pro
 
 Kanban Board
 
-![Kanban Board](Kanban.png)
+![Kanban Board](/SQL%20Resources/Kanban.png)
 
 Database ER Diagram
 
-![ER Diagram](database.png)
+![ER Diagram](/SQL%20Resources/database.png)
 
