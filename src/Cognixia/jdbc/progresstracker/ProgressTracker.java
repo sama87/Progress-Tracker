@@ -26,6 +26,8 @@ public class ProgressTracker {
 		final String URL;
 		final String USERNAME;
 		final String PASSWORD;
+		String status = "";
+		int temp = 0;
 		User user = null;
 		
 		//Test Connection to cognixia database project
@@ -79,7 +81,30 @@ public class ProgressTracker {
 					boolean running = true;
 					
 					while(running) {
-						System.out.println("*****************");
+						
+						try{
+							//Display tracked shows
+
+							statement = conn.createStatement();
+							result = statement.executeQuery("select tv_show.tv_id, name, description, percentage_completed from has_show "
+									+ "inner join tv_show on tv_show.tv_id = has_show.tv_id; ");
+							System.out.println("\nShows currently on watch list:\n");
+							
+							while(result.next()) {
+								status = "";
+								temp = result.getInt(4);
+								if (temp == 0) status = "Not Completed";
+								else if (temp == 100) status = "Completed";
+								else status = "In Progress";
+								System.out.println("Show ID: " + result.getInt(1) + "   Title: " + result.getString(2)+ "   Status: " + status + " "+ result.getInt(4) + "%   Description: \n" + result.getString(3)
+								);
+							}
+						}
+						catch (SQLException e) {
+							e.printStackTrace();
+						}
+						
+						System.out.println("\n*****************");
 						System.out.println("JUMP Tv Watchlist");
 						System.out.println("*****************");
 						System.out.println();
@@ -266,9 +291,10 @@ public class ProgressTracker {
 						epsExisting = rs2.getInt(1);
 						
 						if (epsSeen > epsExisting) {
-							System.out.println("There aren't that many episodes!");
-							id = 0;
-							break;
+							throw new Exception ("There aren't that many episodes!");
+//							System.out.println("There aren't that many episodes!");
+//							id = 0;
+//							break;
 						}
 						else {
 							percent = (epsSeen * 100) / epsExisting;
@@ -299,6 +325,9 @@ public class ProgressTracker {
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				System.out.println(e.getMessage());
 			}
 			
 		}//while
@@ -361,9 +390,12 @@ public class ProgressTracker {
 					System.out.println("Title: " + result.getInt(1)); //puts out the value of the show
 				}
 				
-				prepStatement = conn.prepareStatement("insert into has_show(username, tv_id) values (?,?)");
-				prepStatement.setString(1, user.getUsername());
-				prepStatement.setInt(2, id);
+
+				statement.executeUpdate("Insert into has_show(username, tv_id)\r\n"
+						+ "values (\"" + user.getUsername() + "\" , " + id + ");");
+				//String userName ="\"" + user.getUsername() + "\"";
+				//prepStatement.setString(1, userName);
+				//prepStatement.setInt(2, id);
 				
 				result = prepStatement.executeQuery();
 				break;
