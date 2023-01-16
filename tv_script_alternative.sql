@@ -46,18 +46,21 @@ CREATE TABLE USER (
 CREATE TABLE PLAN_TO_WATCH (
 	username VARCHAR(50),
     show_id INT,
+    PRIMARY KEY (username),
     FOREIGN KEY (username) REFERENCES USER(username)
 );
 
 CREATE TABLE CURRENTLY_WATCHING(
 	username VARCHAR(50),
     show_id INT,
+    PRIMARY KEY (username),
     FOREIGN KEY (username) REFERENCES USER(username)
 );
 
 CREATE TABLE FINALLY_WATCHED(
 	username VARCHAR(50),
     show_id INT,
+    PRIMARY KEY (username),
     FOREIGN KEY (username) REFERENCES USER(username)
 );
 
@@ -69,15 +72,18 @@ CREATE TABLE FINALLY_WATCHED(
 -- CREATE TABLE TRACKER ( username VARCHAR(50) NOT NULL, episode_id int NOT NULL, completed boolean, in_progress boolean, not_started boolean, PRIMARY KEY (username, episode_id), FOREIGN KEY (username) REFERENCES USER (username), FOREIGN KEY (episode_id) REFERENCES EPISODE(episode_id));
 
 -- DO NOT RUN 
-#CREATE TABLE CURRENTLY_WATCHING_EPISODE(
-#	username VARCHAR(50),
-#   show_id INT,
-#    episode_id INT,
-#    FOREIGN KEY (username) REFERENCES USER(username)
-#);
+CREATE TABLE CURRENTLY_WATCHING_EPISODE(
+	username VARCHAR(50),
+	show_id INT,
+    episode_id INT,
+    FOREIGN KEY (username) REFERENCES USER(username),
+    FOREIGN KEY (episode_id) REFERENCES EPISODE(episode_id)
+);
 
 -- INSERT INTO user VALUES ('sdf', 'sdf');
 -- INSERT INTO CURRENTLY_WATCHING VALUES ('sdf', 1);
+INSERT INTO PLAN_TO_WATCH VALUES ('sdf', 1);
+select * from user;
 
 -- select * from user;
 -- select * from  User;
