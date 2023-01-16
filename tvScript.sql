@@ -29,7 +29,7 @@ CREATE TABLE EPISODE (
 CREATE TABLE HAS_SHOW(
 	username VARCHAR(50) NOT NULL,
     tv_id INT NOT NULL,
-    percentage_completed INT,
+    percentage_completed float,
     PRIMARY KEY (username, tv_id),
     FOREIGN KEY (username) REFERENCES USER (username),
     FOREIGN KEY (tv_id) REFERENCES TV_SHOW(tv_id)
@@ -54,5 +54,13 @@ CREATE TABLE TRACKER (
     FOREIGN KEY (username) REFERENCES USER (username),
     FOREIGN KEY (episode_id) REFERENCES EPISODE(episode_id)
 );
+
+INSERT INTO USER VALUES ('sam', 'Trimble');
+INSERT INTO TRACKER VALUES ('sam', 1, false, false, true);
+select sum(tv_id) from episode where tv_id = 1;
+INSERT INTO has_show values ('sam', 1, 1/279);
+select * from has_show;
+
+select * from episode;
 
 
