@@ -67,12 +67,13 @@ public class ProgressTracker {
 		
 		while (run != 'n') {
 			
-			System.out.println("Do you have an existing account with JUMP Tv?: ");
+			System.out.println("Do you have an existing account with JUMP Tv? (type 'yes' or 'no'): ");
 			String ans = in.next().toLowerCase();
 			
 			if (!ans.equals("no")) {
 				
 				user = login(conn, statement, prepStatement, result, user, in);
+				System.out.println(user);
 				
 				if(user != null) { //if user is not null 
 					
@@ -177,9 +178,7 @@ public class ProgressTracker {
 		
 		try {			
 			
-			prepStatement = conn.prepareStatement("select username, password from user where username= ? and password= ?");
-			prepStatement.setString(1, user.getUsername());
-			prepStatement.setString(2, user.getPassword());
+			prepStatement = conn.prepareStatement("select username, password from user where username= ? and password= ?");			
 			
 			String testLogUser = "";
 			String testLogPass = "";
@@ -192,16 +191,15 @@ public class ProgressTracker {
 				testLogPass = result.getString(2);	
 			}			
 			
-//			System.out.println("login: " + testLogUser);
-//			System.out.println("password: " + testLogPass);
+			System.out.println("login: " + testLogUser);
+			System.out.println("password: " + testLogPass);
 			
 			return user;
 			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			System.out.println();
-			e.printStackTrace();
-			System.out.println("Wrong Username/Password ============== (T.T)");
+			System.out.println("\nWrong Username/Password ============== (T.T)");
 			System.out.println("Do you want to create a username and password? 'y' or 'n': ");
 			char reply = in.next().charAt(0);
 			
