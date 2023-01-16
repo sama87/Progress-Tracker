@@ -57,3 +57,6 @@ CREATE TABLE TRACKER (
 select * from user;
 select * from tv_show;
 select * from episode;
+
+delete from user 
+where username='joel';
