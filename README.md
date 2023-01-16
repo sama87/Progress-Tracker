@@ -46,3 +46,10 @@ Users have more flexibility using Jump Tv with the follwing additions to the pro
 
 - [x] Shows that are 'In-Progress' have an indiccator for how along a user is from completing a show
 
+## Project documentation
+
+Kanban Board
+![Kanban Board](kanban.png)
+
+Database ER Diagram
+![ER Diagram](database.png)
