@@ -1,6 +1,12 @@
 # Jump Tv
 In this project, a user is able to log in and/or create account to utilize the Jump Tv to keep track of there progress watching top TV shows. 
 
+## Authors - Team 3
+* Joel Garcia
+* Samuel Trimble
+* Matteo Antunez
+* De'Aundre Snow
+
 ## Technologies Utilized
 * Java
     * JDBC - Java connector for MySQL
