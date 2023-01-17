@@ -70,6 +70,7 @@ public class ProgressTracker {
 		while (run != 'n') {			
 			System.out.println("Do you have an existing account with JUMP Tv? ('yes' or 'no'): ");
 			String ans = in.next().toLowerCase();
+			String query = "";
 			
 			if (!ans.equals("no")) {
 				
@@ -86,8 +87,9 @@ public class ProgressTracker {
 							//Display tracked shows
 
 							statement = conn.createStatement();
+
 							result = statement.executeQuery("select tv_show.tv_id, name, description, percentage_completed from has_show "
-									+ "inner join tv_show on tv_show.tv_id = has_show.tv_id; ");
+									+ "inner join tv_show on tv_show.tv_id = has_show.tv_id where username = \"" + user.getUsername() + "\";");
 							System.out.println("\nShows currently on watch list:\n");
 							
 							while(result.next()) {
@@ -255,16 +257,17 @@ public class ProgressTracker {
 		String yesNo = "";
 		boolean exit = false;
 		ResultSet rs2 = null;
+		String query;
 
 		while(true) {
 			try{
 				//Display tracked shows
 
 				statement = conn.createStatement();
+			
 				result = statement.executeQuery("select tv_show.tv_id, name, description, percentage_completed from has_show "
-						+ "inner join tv_show on tv_show.tv_id = has_show.tv_id; ");
+						+ "inner join tv_show on tv_show.tv_id = has_show.tv_id where username = \"" + user.getUsername() + "\";");
 				System.out.println("\nShows currently on watch list:\n");
-				
 				while(result.next()) {
 					System.out.println("Show ID: " + result.getInt(1) + "   Title: " + result.getString(2)+ "   Completed: " + result.getInt(4) + "%   Description: \n" + result.getString(3)
 					);
@@ -277,7 +280,7 @@ public class ProgressTracker {
 				//Check tracked shows for valid id, update if valid
 				
 				result = statement.executeQuery("select tv_show.tv_id, name from has_show "
-						+ "inner join tv_show on tv_show.tv_id = has_show.tv_id; ");
+						+ "inner join tv_show on tv_show.tv_id = has_show.tv_id where username = \"" + user.getUsername() + "\";");
 				while(result.next()) {
 					if (id == result.getInt(1)  ) {
 						System.out.println("How many episodes of " + result.getString(2) + " have you seen?");
@@ -286,7 +289,7 @@ public class ProgressTracker {
 						
 						rs2 = statement.executeQuery("select COUNT(episode_id) from episode "
 								+ "inner join tv_show on tv_show.tv_id = episode.tv_id "
-								+ "where tv_show.tv_id = " + id + ";");
+								+ "where tv_show.tv_id = " + id);
 						rs2.next();
 						epsExisting = rs2.getInt(1);
 						
@@ -298,7 +301,6 @@ public class ProgressTracker {
 						}
 						else {
 							percent = (epsSeen * 100) / epsExisting;
-							System.out.println(percent);
 							statement.executeUpdate("update has_show set percentage_completed = " + percent + " where username = \"" +
 							user.getUsername() + "\" AND tv_id = " + id + ";");
 
@@ -369,8 +371,8 @@ public class ProgressTracker {
 				
 				statement = conn.createStatement();
 				result  = statement.executeQuery("Select tv_show.tv_id, name, description FROM tv_show"
-						+ " left outer join has_show on has_show.tv_id = tv_show.tv_id"
-						+ " where has_show.tv_id is null;");
+						+ " left outer join has_show on has_show.tv_id = tv_show.tv_id");
+
 				
 				while(result.next()) {
 					
@@ -444,7 +446,7 @@ public class ProgressTracker {
 				//Display shows that are being tracked
 				statement = conn.createStatement();
 				result = statement.executeQuery("select tv_show.tv_id, name, description, percentage_completed from has_show "
-						+ "inner join tv_show on tv_show.tv_id = has_show.tv_id; ");
+						+ "inner join tv_show on tv_show.tv_id = has_show.tv_id where username = \"" + user.getUsername() + "\";");
 				System.out.println("\nShows currently on watch list:\n");
 				
 				
@@ -459,11 +461,11 @@ public class ProgressTracker {
 				//Remove selection from watch list 
 				statement = conn.createStatement();
 				result = statement.executeQuery("select tv_show.tv_id, name from has_show "
-						+ "inner join tv_show on tv_show.tv_id = has_show.tv_id; ");
+						+ "inner join tv_show on tv_show.tv_id = has_show.tv_id where username = \"" + user.getUsername() + "\";");
 				while(result.next()) {
 					if (id == result.getInt(1)  ) {
 						System.out.println(result.getString(2) + " has been removed from your watch list");
-						statement.executeUpdate("DELETE FROM has_show WHERE tv_id = " + id);
+						statement.executeUpdate("DELETE FROM has_show WHERE tv_id = " + id + " AND username = \"" + user.getUsername() + "\";");
 						id = 0;
 						break;
 					}			
